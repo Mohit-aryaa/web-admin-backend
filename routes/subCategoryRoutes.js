@@ -7,6 +7,8 @@ var subCategoryController = require('../controllers/subCategoryController.js');
  */
 router.get('/', subCategoryController.list);
 
+router.get('/getDataByCategoryId/:id', subCategoryController.listCategoryData)
+
 /*
  * GET
  */
@@ -16,6 +18,8 @@ router.get('/:id', subCategoryController.show);
  * POST
  */
 router.post('/', subCategoryController.create);
+
+router.post('/bulkDelete', subCategoryController.bulkDelete);
 
 /*
  * PUT

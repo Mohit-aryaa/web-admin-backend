@@ -4,7 +4,7 @@ const multer = require('multer')
 
 var storage = multer.diskStorage({
     destination: function(req, file, cb) {
-        cb(null, 'uploads/')
+        cb(null, 'uploads')
     },
     filename: function(req, file, cb) {
         let ext= path.extname(file.originalname)
@@ -22,9 +22,9 @@ var upload = multer ({
             callback(null, false)
         }
     },
-    limits: {
-        fileSize:1024 * 1024 * 2
-    }
+    // limits: {
+    //     fileSize:1024 * 1024 * 2
+    // }
 }) 
 
 module.exports = upload

@@ -84,7 +84,9 @@ module.exports = {
         var users = new UsersModel({
             name: req.body.name,
             email: req.body.email,
-            roleType: req.body.roleType
+            roleType: req.body.roleType,
+            created_at : new Date(),
+            updated_at: 'none'
         });
 
         users.save(function (err, users) {
@@ -124,6 +126,7 @@ module.exports = {
             users.name = req.body.name ? req.body.name : users.name;
             users.email = req.body.email ? req.body.email : users.email;
             users.roleType = req.body.roleType ? req.body.roleType : users.roleType;
+            users.updated_at = new Date();
 
             users.save(function (err, users) {
                 if (err) {

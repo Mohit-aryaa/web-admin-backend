@@ -4,8 +4,8 @@ mongoose.connect('mongodb://localhost:27017/webAdmin', {useNewUrlParser: true },
     else { console.log('Error in DB connection :' + err ) }
 });
 
-require('./usersModel');
-require('./roleModel');
-require('./productsModel');
-require('./categoryModel');
-require('./subCategoryModel');
+// require('./usersModel');
+// require('./roleModel');
+// require('./productsModel');
+// require('./categoryModel');
+// require('./subCategoryModel');

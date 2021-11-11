@@ -1,4 +1,5 @@
 var SubcategoryModel = require('../models/subCategoryModel.js');
+var CategoryModel = require('../models/categoryModel.js');
 
 /**
  * subCategoryController.js
@@ -38,11 +39,31 @@ module.exports = {
                 }
                 let SubCategories = subCategories.slice(from, to);
                 res.status(200).json({
-                    total: SubCategories.length,
+                    total: subCategories.length,
                     SubCategories
                 });
             }
-        }).sort({_id:-1});
+        }).populate('category').sort({_id:-1});
+    },
+
+    listCategoryData: function (req, res) {
+        var id = req.params.id;
+
+        SubcategoryModel.find({category: id}, function (err, subCategory) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when getting subCategory.',
+                    error: err
+                });
+            }
+
+            
+            let total = subCategory.length;
+            return res.json({
+                total: total,
+                SubCategory: subCategory
+            });
+        });
     },
 
     /**
@@ -76,7 +97,9 @@ module.exports = {
         var subCategory = new SubcategoryModel({
 			subCategoryName : req.body.subCategoryName,
 			subCategoryDescription : req.body.subCategoryDescription,
-            category: req.body.category
+            category: req.body.category,
+            created_at : new Date(),
+            updated_at: 'none'
         });
 
         subCategory.save(function (err, subCategory) {
@@ -114,6 +137,7 @@ module.exports = {
             subCategory.subCategoryName = req.body.subCategoryName ? req.body.subCategoryName : subCategory.subCategoryName;
 			subCategory.subCategoryDescription = req.body.subCategoryDescription ? req.body.subCategoryDescription : subCategory.subCategoryDescription;
 			subCategory.category = req.body.category ? req.body.category : subCategory.category;
+            subCategory.updated_at = new Date()
             subCategory.save(function (err, subCategory) {
                 if (err) {
                     return res.status(500).json({
@@ -143,5 +167,28 @@ module.exports = {
 
             return res.status(204).json();
         });
+    },
+
+    bulkDelete: function (req, res) {
+        const getId = req.body
+        const query = { _id: { $in: getId} };
+        console.log(query)
+        
+        
+        SubcategoryModel.deleteMany(query, function (err) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when deleting the products.',
+                    error: err
+                });
+            }
+            
+            return res.status(200).json({
+                message: 'Products deleted successfully'
+            });
+
+        });
     }
+
+
 };

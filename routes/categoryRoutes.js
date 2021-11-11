@@ -17,6 +17,7 @@ router.get('/:id', categoryController.show);
  */
 router.post('/', categoryController.create);
 
+router.post('/bulkDelete', categoryController.bulkDelete);
 /*
  * PUT
  */

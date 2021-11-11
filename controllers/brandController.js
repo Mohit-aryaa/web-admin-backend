@@ -75,7 +75,9 @@ module.exports = {
     create: function (req, res) {
         var brand = new BrandModel({
 			brandName : req.body.brandName,
-			brandDescription : req.body.brandDescription
+			brandDescription : req.body.brandDescription,
+            created_at : new Date(),
+            updated_at: 'none'
         });
 
         brand.save(function (err, brand) {
@@ -112,7 +114,7 @@ module.exports = {
 
             brand.brandName = req.body.brandName ? req.body.brandName : brand.brandName;
 			brand.brandDescription = req.body.brandDescription ? req.body.brandDescription : brand.brandDescription;
-			
+			brand.updated_at = new Date();
             brand.save(function (err, brand) {
                 if (err) {
                     return res.status(500).json({
@@ -141,6 +143,27 @@ module.exports = {
             }
 
             return res.status(204).json();
+        });
+    },
+
+    bulkDelete: function (req, res) {
+        const getId = req.body
+        const query = { _id: { $in: getId} };
+        console.log(query)
+        
+        
+        BrandModel.deleteMany(query, function (err) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when deleting the products.',
+                    error: err
+                });
+            }
+            
+            return res.status(200).json({
+                message: 'Products deleted successfully'
+            });
+
         });
     }
 };

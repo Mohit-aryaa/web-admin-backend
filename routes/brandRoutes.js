@@ -17,6 +17,8 @@ router.get('/:id', brandController.show);
  */
 router.post('/', brandController.create);
 
+router.post('/bulkDelete', brandController.bulkDelete);
+
 /*
  * PUT
  */

@@ -1,15 +1,12 @@
 var mongoose = require('mongoose');
 var Schema   = mongoose.Schema;
 
-var productsSchema = new Schema({
+var bundleProductSchema = new Schema({
 	'productName' : String,
-	'productDescription': String,
-	'productImages' : Array,
-	'productCode' : String,
-	'productModel': String,
-	'productCountry': String,
-	'manfactureDate': String,
-	'stock': Number,
+	'products' :  {
+		type: Schema.Types.Array,
+		ref: 'products'
+   },
 	'productCategory' : {
 		type: Schema.Types.ObjectId,
 		ref: 'category'
@@ -26,14 +23,19 @@ var productsSchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref: 'vendor'
 	},
-   'tags' : Object,
-   'isBundle': Boolean,
-	'todaysDeal' : Boolean,
-	'publish' : Boolean,
-	'featured' : Boolean,
 	'price' : String,
+	'stock': Number,
+	'productModel' : String,
+	'productCode' : String,
+	'productImage' : String,
+	'tags' : Object,
+	'productDescription' : String,
+	'isBundle': Boolean,
+	'todaysDeal': Boolean,
+	'publish': Boolean,
+	'featured': Boolean,
 	'created_at': String,
 	'updated_at': String
 });
 
-module.exports = mongoose.model('products', productsSchema);
+module.exports = mongoose.model('bundleProduct', bundleProductSchema);

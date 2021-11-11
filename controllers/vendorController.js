@@ -75,7 +75,9 @@ module.exports = {
     create: function (req, res) {
         var vendor = new VendorModel({
 			name : req.body.name,
-			status : req.body.status
+			status : req.body.status,
+            created_at : new Date(),
+            updated_at: 'none'
         });
 
         vendor.save(function (err, vendor) {
@@ -112,6 +114,7 @@ module.exports = {
 
             vendor.name = req.body.name ? req.body.name : vendor.name;
 			vendor.status = req.body.status ? req.body.status : vendor.status;
+            venodr.updated_at = new Date();
 			
             vendor.save(function (err, vendor) {
                 if (err) {
@@ -141,6 +144,27 @@ module.exports = {
             }
 
             return res.status(204).json();
+        });
+    },
+
+    bulkDelete: function (req, res) {
+        const getId = req.body
+        const query = { _id: { $in: getId} };
+        console.log(query)
+        
+        
+        VendorModel.deleteMany(query, function (err) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when deleting the products.',
+                    error: err
+                });
+            }
+            
+            return res.status(200).json({
+                message: 'Vendors deleted successfully'
+            });
+
         });
     }
 };

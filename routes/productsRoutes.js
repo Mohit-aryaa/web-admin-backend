@@ -7,18 +7,24 @@ const upload = require('../middleware/upload');
  */
 router.get('/', productsController.list);
 
+router.get('/stock', productsController.listStock);
+
 /*
  * GET
  */
 router.get('/:id', productsController.show);
+
+router.post('/removeImage/', productsController.removeImage);
 
 /*
  * POST
  */
 router.post('/',  productsController.create);
 
+// router.post('/stock', productsController.createStock);
 
-router.post('/store', upload.single('productImage'), productsController.store);
+
+router.post('/store', upload.array('images[]'), productsController.store);
 
 router.post('/bulkDelete', productsController.bulkDelete);
 
@@ -26,6 +32,10 @@ router.post('/bulkDelete', productsController.bulkDelete);
  * PUT
  */
 router.put('/:id', productsController.update);
+
+router.put('/stock/:id', productsController.updateStock);
+
+router.put('/stock/bundle/:id', productsController.updateBundleStock);
 
 /*
  * DELETE

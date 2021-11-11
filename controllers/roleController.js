@@ -64,7 +64,9 @@ module.exports = {
     create: function (req, res) {
         var role = new RoleModel({
 			roleName : req.body.roleName,
-			permissions : req.body.permissions
+			permissions : req.body.permissions,
+            created_at : new Date(),
+            updated_at: 'none'
         });
 
         console.log(role);
@@ -102,6 +104,7 @@ module.exports = {
 
             role.roleName = req.body.roleName ? req.body.roleName : role.roleName;
 			role.permissions = req.body.permissions ? req.body.permissions : role.permissions;
+            role.updated_at = new Date();
 			
             role.save(function (err, role) {
                 if (err) {

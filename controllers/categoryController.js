@@ -142,5 +142,27 @@ module.exports = {
 
             return res.status(204).json();
         });
+    },
+
+    bulkDelete: function (req, res) {
+        const getId = req.body
+        const query = { _id: { $in: getId} };
+        console.log(query)
+        
+        
+        CategoryModel.deleteMany(query, function (err) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when deleting the products.',
+                    error: err
+                });
+            }
+            
+            return res.status(200).json({
+                message: 'Products deleted successfully'
+            });
+
+        });
     }
+
 };
