@@ -187,19 +187,18 @@ module.exports = {
     },
 
     store:  function (req, res) {
-        console.log('req', req.files)
+        //console.log('req', req.files)
         let path = '';
         if (req.files) {
             req.files.forEach(function(files,index, arr) {
                 path = path + files.path + ',';
             })
             path = path.substring(0, path.lastIndexOf(",")) 
-            console.log(path)
+            //console.log(path)
             return res.json({
                 imagePath: path.split(",")
             })
-        }
-       
+        } 
     },
 
     /**
@@ -218,25 +217,12 @@ module.exports = {
                 return res.status(404).json({
                     message: 'No such products'
                 });
-            } else {
-                if(req.body.productImage == products.productImage) {
-                    console.log('successfully image updated');
-                } else {
-                    fs.unlink(products.productImage, (err) => {
-                        if (err) {
-                            console.log("failed to delete local image:" + err);
-                        } else {
-                            console.log('successfully deleted local image');
-                        }
-                    });
-                }
-                
-            }
+            } 
 
             const getStock = products.stock;  
-
+            console.log(req.body.productImages)
             products.productName = req.body.productName ? req.body.productName : products.productName;
-            products.productImages = req.body.productImages ? req.body.productImages : products.productImage;
+            products.productImages = req.body.productImages ? products.productImages.concat(req.body.productImages) :  products.productImages;
             products.productDescription = req.body.productDescription ? req.body.productDescription : products.productDescription;
             products.productCode = req.body.productCode ? req.body.productCode : products.productCode;
             products.productModel = req.body.productModel ? req.body.productModel : products.productModel;
@@ -422,8 +408,6 @@ module.exports = {
      */
 
      removeImage: function (req, res) {
-         //console.log(req.body.id)
-         //console.log(req.body.image)
          ProductsModel.findOne({_id: req.body.id}, function(err, product) {
              if(err) {
                 return res.status(500).json({
@@ -447,17 +431,27 @@ module.exports = {
                         console.log('successfully deleted local image');
                     }
                 });
+                product.save(function(err, SavedProducts) {
+                    if(err) {
+                       return res.status(500).json({
+                           message: 'Error when deleting the products.',
+                           error: err
+                       });
+                    }
+                    return res.json({
+                        message: 'success', 
+                        images: SavedProducts.productImages
+                    })
+                });
             }
          })
-         return res.json({
-             message: 'success'
-         })
+         
      },
 
 
     remove:  function (req, res) {
-        var id = req.parms.id;
-        
+        const id = req.params.id;
+        //console.log(id)
         ProductsModel.findByIdAndRemove(id, function (err, products) {
             if (err) {
                 return res.status(500).json({
@@ -466,16 +460,20 @@ module.exports = {
                 });
             } 
             let getProductsImages = products.productImages;
-            for (let index = 0; index < getProductsImages.length; index++) {
-                fs.unlink(getProductsImages[index], (err) => {
-                    if (err) {
-                        console.log("failed to delete local image:" + err);
-                    } else {
-                        console.log('successfully deleted local image');
-                    }
-                });
+            if (getProductsImages == null) {
+                console.log('product has no images')
+            } else {
+                for (let index = 0; index < getProductsImages.length; index++) {
+                    fs.unlink(getProductsImages[index], (err) => {
+                        if (err) {
+                            console.log("failed to delete local image:" + err);
+                        } else {
+                            console.log('successfully deleted local image');
+                        }
+                    });
+                }
             }
-
+            
             return res.status(200).json({
                 message: 'product deleted successfully'
             });

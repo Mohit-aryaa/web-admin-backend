@@ -18,7 +18,9 @@ router.get('/:id', bundleProductController.show);
  */
 router.post('/', bundleProductController.create);
 
-router.post('/store', upload.single('productImage'), bundleProductController.store);
+router.post('/removeImage/', bundleProductController.removeImage);
+
+router.post('/store', upload.array('images[]'), bundleProductController.store);
 
 
 router.post('/bulkDelete', bundleProductController.bulkDelete);

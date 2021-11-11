@@ -86,7 +86,7 @@ module.exports = {
             stock : req.body.stock,
 			productModel : req.body.productModel,
 			productCode : req.body.productCode,
-			productImage : req.body.productImage,
+			productImages : req.body.productImages,
 			tags : req.body.tags, 
             isBundle: true,
             todaysDeal : req.body.todaysDeal,
@@ -136,14 +136,19 @@ module.exports = {
        
     },
 
-    store: function (req, res) {
-        //console.log( req.files)
-        if(req) {  
-            //console.log( req.file.path )
-            return res.json({
-                path: req.file.path 
+    store:  function (req, res) {
+        //console.log('req', req.files)
+        let path = '';
+        if (req.files) {
+            req.files.forEach(function(files,index, arr) {
+                path = path + files.path + ',';
             })
-        }
+            path = path.substring(0, path.lastIndexOf(",")) 
+            //console.log(path)
+            return res.json({
+                imagePath: path.split(",")
+            })
+        } 
     },
 
     /**
@@ -164,18 +169,7 @@ module.exports = {
                 return res.status(404).json({
                     message: 'No such bundleProduct'
                 });
-            }  
-            if(req.body.productImage == bundleProduct.productImage) {
-                console.log('successfully image updated');
-            } else {
-                fs.unlink(bundleProduct.productImage, (err) => {
-                    if (err) {
-                        console.log("failed to delete local image:" + err);
-                    } else {
-                        console.log('successfully deleted local image');
-                    }
-                });
-            }
+            }   
             
             const getStock = bundleProduct.stock;
 
@@ -190,7 +184,7 @@ module.exports = {
 			bundleProduct.price = req.body.price ? req.body.price : bundleProduct.price;
 			bundleProduct.productModel = req.body.productModel ? req.body.productModel : bundleProduct.productModel;
 			bundleProduct.productCode = req.body.productCode ? req.body.productCode : bundleProduct.productCode;
-			bundleProduct.productImage = req.body.productImage ? req.body.productImage : bundleProduct.productImage;
+			bundleProduct.productImages = req.body.productImages ? bundleProduct.productImages.concat(req.body.productImages) :  bundleProduct.productImages;
 			bundleProduct.tags = req.body.tags ? req.body.tags : bundleProduct.tags;
             bundleProduct.isBundle = true;
             bundleProduct.todaysDeal = req.body.todaysDeal ? req.body.todaysDeal : bundleProduct.todaysDeal;
@@ -248,6 +242,47 @@ module.exports = {
         });
     },
 
+    removeImage: function (req, res) {
+        BundleproductModel.findOne({_id: req.body.id}, function(err, bundleProduct) {
+            if(err) {
+               return res.status(500).json({
+                   message: 'Error when deleting the products.',
+                   error: err
+               });
+            }
+            if (!bundleProduct) {
+               return res.status(404).json({
+                   message: 'No such products'
+               });
+           } else {
+               const ImagesArray = bundleProduct.productImages
+               const productImageIndex= bundleProduct.productImages.indexOf(req.body.image)
+               console.log(productImageIndex)
+               ImagesArray.splice(productImageIndex, 1);
+               fs.unlink(req.body.image, (err) => {
+                   if (err) {
+                       console.log("failed to delete local image:" + err);
+                   } else {
+                       console.log('successfully deleted local image');
+                   }
+               });
+               bundleProduct.save(function(err, SavedBundleProducts) {
+                   if(err) {
+                      return res.status(500).json({
+                          message: 'Error when deleting the products.',
+                          error: err
+                      });
+                   }
+                   return res.json({
+                       message: 'success', 
+                       images: SavedBundleProducts.productImages
+                   })
+               });
+           }
+        })
+        
+    },
+
     /**
      * bundleProductController.remove()
      */
@@ -260,8 +295,8 @@ module.exports = {
                     message: 'Error when deleting the bundleProduct.',
                     error: err
                 });
-            } if (bundleProduct.productImage == undefined) {
-                console.log('No image found')
+            } if (bundleProduct.productImage == null) {
+                console.log('Product has no image')
             } else {
                 fs.unlink(bundleProduct.productImage, (err) => {
                     if (err) {
@@ -279,38 +314,44 @@ module.exports = {
     bulkDelete: function (req, res) {
         var getProduct = any;
         const getId = req.body
-        const query = { _id: { $in: getId} };
+        const query = { _id: { $in: getId } };
         console.log(query)
-        BundleproductModel.find(query, function(err, products) {
-            if(err) {
+        BundleproductModel.find(query, function (err, bundleproducts) {
+            if (err) {
                 return res.status(500).json({
                     message: 'Error when fetcching the products.',
                     error: err
                 });
             }
-            getProduct = products
+            getbundleProduct = bundleproducts
         })
-        
+
         BundleproductModel.deleteMany(query, function (err) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when deleting the products.',
                     error: err
                 });
-            }  else {
-                for (let index = 0; index < getProduct.length; index++) {
-                    fs.unlink(getProduct[index].productImage, (err) => {
-                        if (err) {
-                            console.log("failed to delete local image:"+err);
-                        } else {
-                            console.log('successfully deleted local image');                                
-                        }
-                    });
-                }
             }
+            if(getbundleProduct.productImages = null) {
+                console.log('product has no image');
+            }
+               for (let index = 0; index < getbundleProduct.length; index++) {
+                   let getBundleProductsImages = getbundleProduct[index].productImages
+                    for (let i = 0; i < getProductsImages.length; i++) {
+                        fs.unlink(getBundleProductsImages[i], (err) => {
+                            if (err) {
+                                console.log("failed to delete local image:" + err);
+                            } else {
+                                console.log('successfully deleted local image');
+                            }
+                        });
+                    }
+                }
             
+
             return res.status(200).json({
-                message: 'Products deleted successfully'
+                message: 'Bundle Products deleted successfully'
             });
 
         });

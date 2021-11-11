@@ -7,6 +7,7 @@ var bundleProductSchema = new Schema({
 		type: Schema.Types.Array,
 		ref: 'products'
    },
+	'productImages' : Array,
 	'productCategory' : {
 		type: Schema.Types.ObjectId,
 		ref: 'category'
@@ -27,7 +28,6 @@ var bundleProductSchema = new Schema({
 	'stock': Number,
 	'productModel' : String,
 	'productCode' : String,
-	'productImage' : String,
 	'tags' : Object,
 	'productDescription' : String,
 	'isBundle': Boolean,
