@@ -139,6 +139,28 @@ module.exports = {
             publish: req.body.publish,
             featured: req.body.featured,
             price: req.body.price,
+            mrp : req.body.mrp,
+            purchasePrice: req.body.purchasePrice,
+            shippingCost: req.body.shippingCost,
+            productTax: req.body.productTax,
+            productDiscount: req.body.productDiscount,
+            maxQuantity: req.body.maxQuantity,
+            minimumQuantity: req.body.minimumQuantity,
+            customersOptions: req.body.customersOptions,
+            seoKeyWords: req.body.seoKeyWords,
+            metaTagKeywords: req.body.metaTagKeywords,
+            metaTagDescription: req.body.metaTagDescription,
+            metaTagTitle: req.body.metaTagTitle,
+            imageAltTag: req.body.imageAltTag,
+            seoUrl : req.body.seoUrl,
+            youtubeVideoId : req.body.youtubeVideoId,
+            question: req.body.question,
+            blogPost: req.body.blogPost,
+            similarProduct: req.body.similarProduct,
+            delivery:  req.body.delivery,
+            bulkDiscount : req.body.bulkDiscount,
+            cashback :req.body.cashback,
+            variant : req.body.variant,
             created_at : new Date(),
             updated_at: 'none'
         });
@@ -239,6 +261,28 @@ module.exports = {
             products.publish = req.body.publish ? req.body.publish : products.publish;
             products.featured = req.body.featured ? req.body.featured : products.featured;
             products.price = req.body.price ? req.body.price : products.price;
+            products.mrp = req.body.mrp ? req.body.mrp : products.mrp;
+            products.purchasePrice  = req.body.purchasePrice ? req.body.purchasePrice : products.purchasePrice;
+            products.shippingCost = req.body.shippingCost ? req.body.shippingCost : products.shippingCost;
+            products.productTax = req.body.productTax ? req.body.productTax : products.productTax;
+            products.productDiscount = req.body.productDiscount ? req.body.productDiscount : products.productDiscount;
+            products.maxQuantity = req.body.maxQuantity ? req.body.maxQuantity : products.maxQuantity;
+            products.minimumQuantity = req.body.minimumQuantity ? req.body.minimumQuantity : req.body.minimumQuantity;
+            products.customersOptions = req.body.customersOptions ? req.body.customersOptions : products.customersOptions;
+            products.seoKeyWords =  req.body.seoKeyWords ? req.body.seoKeyWords : products.seoKeyWords;
+            products.metaTagKeywords = req.body.metaTagKeywords ? req.body.metaTagKeywords : products.metaTagKeywords;
+            products.metaTagDescription = req.body.metaTagDescription ? req.body.metaTagDescription : products.metaTagDescription;
+            products.metaTagTitle = req.body.metaTagTitle ? req.body.metaTagTitle : products.metaTagTitle ;
+            products.imageAltTag = req.body.imageAltTag ? req.body.imageAltTag : products.imageAltTag;
+            products.seoUrl  = req.body.seoUrl ? req.body.seoUrl : products.seoUrl;
+            products.youtubeVideoId = req.body.youtubeVideoId ? req.body.youtubeVideoId : products.youtubeVideoId;
+            products.question = req.body.question ? req.body.question : products.question;
+            products.blogPost = req.body.blogPost ? req.body.blogPost : products.blogPost;
+            products.similarProduct = req.body.similarProduct ? req.body.similarProduct : products.similarProduct;
+            products.delivery =  req.body.delivery ? req.body.delivery : products.delivery;
+            products.bulkDiscount = req.body.bulkDiscount ? req.body.bulkDiscount : products.bulkDiscount;
+            products.cashback = req.body.cashback ? req.body.cashback :  products.cashback;
+            products.variant = req.body.variant ? req.body.variant : products.variant;
             products.updated_at = new Date();
 
             if(req.body.stock > getStock) {
