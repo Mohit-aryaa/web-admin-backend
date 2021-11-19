@@ -1,8 +1,14 @@
 var BundleproductModel = require('../models/bundleProductModel.js');
 const fs = require('fs');
-const { any } = require('../middleware/upload.js');
+//const { any } = require('../middleware/upload.js');
 var StocklogsModel = require('../models/stockLogsModel.js');
-
+const connection = require("../db");
+//const { any } = require('../middleware/upload.js');
+const mongoose = require("mongoose");
+const Grid = require("gridfs-stream");
+let gfs;
+connection();
+const conn = mongoose.connection;
 /**
  * bundleProductController.js
  *
@@ -44,7 +50,7 @@ module.exports = {
                     BundleProducts
                 });
             }
-        }).populate('productCategory').populate('productSubCategory').populate('productBrand').populate('vendor').populate('products').sort({_id:-1});
+        }).populate('productCategory').populate('productSubCategory').populate('productSubChildCategory').populate('productBrand').populate('vendor').populate('products').sort({_id:-1});
     },
 
     /**
@@ -80,23 +86,48 @@ module.exports = {
             productDescription: req.body.productDescription,
 			productCategory : req.body.productCategory,
 			productSubCategory : req.body.productSubCategory,
+            productSubChildCategory: req.body.productSubChildCategory,
 			productBrand : req.body.productBrand,
             vendor: req.body.vendor,
             price : req.body.price,
             stock : req.body.stock,
 			productModel : req.body.productModel,
-			productCode : req.body.productCode,
+			productSku : req.body.productSku,
 			productImages : req.body.productImages,
 			tags : req.body.tags, 
+            productCountry: req.body.productCountry,
+            manfactureDate: req.body.manfactureDate,
             isBundle: true,
             todaysDeal : req.body.todaysDeal,
             publish : req.body.publish,
             featured : req.body.faetured,
+            mrp : req.body.mrp,
+            purchasePrice: req.body.purchasePrice,
+            shippingCost: req.body.shippingCost,
+            productTax: req.body.productTax,
+            productDiscount: req.body.productDiscount,
+            maxQuantity: req.body.maxQuantity,
+            minimumQuantity: req.body.minimumQuantity,
+            customersOptions: req.body.customersOptions,
+            seoKeyWords: req.body.seoKeyWords,
+            metaTagKeywords: req.body.metaTagKeywords,
+            metaTagDescription: req.body.metaTagDescription,
+            metaTagTitle: req.body.metaTagTitle,
+            imageAltTag: req.body.imageAltTag,
+            seoUrl : req.body.seoUrl,
+            youtubeVideoId : req.body.youtubeVideoId,
+            question: req.body.question,
+            blogPost: req.body.blogPost,
+            similarProduct: req.body.similarProduct,
+            delivery:  req.body.delivery,
+            bulkDiscount : req.body.bulkDiscount,
+            cashBack :req.body.cashBack,
+            variant : req.body.variant,
             created_at : new Date(),
             updated_at: 'none'
         });
 
-        BundleproductModel.countDocuments({productCode: req.body.productCode}, function(err, count) {
+        BundleproductModel.countDocuments({productSku: req.body.productSku}, function(err, count) {
             if(count>0) {
                 return res.status(500).json({
                     message: 'Product code already exist'
@@ -136,19 +167,38 @@ module.exports = {
        
     },
 
-    store:  function (req, res) {
-        //console.log('req', req.files)
+    upload: function(req, res) {
         let path = '';
-        if (req.files) {
-            req.files.forEach(function(files,index, arr) {
-                path = path + files.path + ',';
-            })
-            path = path.substring(0, path.lastIndexOf(",")) 
-            //console.log(path)
-            return res.json({
-                imagePath: path.split(",")
-            })
-        } 
+        let setpath = 'http://localhost:3000/bundle-products/file/'
+        if (req.files === undefined) 
+        return res.send("you must select a file.");
+
+        req.files.forEach(function(files,index, arr) {
+            path = path + setpath+ files.id + ',';
+        })
+        path = path.substring(0, path.lastIndexOf(",")) 
+        
+        return res.json({
+            imagePath: path.split(',')
+        })
+    },
+
+    getFile: async function(req, res) {
+        gfs = await Grid(conn.db,  mongoose.mongo);
+        gfs.collection("uploads");
+        try {
+            //console.log('req.params.id', req.params.id)
+            const file = await gfs.files.find(new mongoose.Types.ObjectId(req.params.id)).toArray();
+            //console.log('file', file[0])
+            const readStream = gfs.createReadStream(file[0].filename);
+            readStream.pipe(res);
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({
+                message:"not found" , 
+                error: error.message
+            }) ;
+        }
     },
 
     /**
@@ -178,21 +228,47 @@ module.exports = {
 			bundleProduct.productDescription = req.body.productDescription ? req.body.productDescription : bundleProduct.productDescription;
 			bundleProduct.productCategory = req.body.productCategory ? req.body.productCategory : bundleProduct.productCategory;
 			bundleProduct.productSubCategory = req.body.productSubCategory ? req.body.productSubCategory : bundleProduct.productSubCategory;
-			bundleProduct.productBrand = req.body.productBrand ? req.body.productBrand : bundleProduct.productBrand;
+			bundleProduct.productSubChildCategory = req.body.productSubChildCategory ? req.body.productSubChildCategory : bundleProduct.productSubChildCategory;
+            bundleProduct.productBrand = req.body.productBrand ? req.body.productBrand : bundleProduct.productBrand;
             bundleProduct.vendor = req.body.vendor ? req.body.vendor : bundleProduct.vendor;
 			bundleProduct.stock = req.body.stock ? req.body.stock : bundleProduct.stock;
 			bundleProduct.price = req.body.price ? req.body.price : bundleProduct.price;
 			bundleProduct.productModel = req.body.productModel ? req.body.productModel : bundleProduct.productModel;
-			bundleProduct.productCode = req.body.productCode ? req.body.productCode : bundleProduct.productCode;
+			bundleProduct.productSku = req.body.productSku ? req.body.productSku : bundleProduct.productSku;
 			bundleProduct.productImages = req.body.productImages ? bundleProduct.productImages.concat(req.body.productImages) :  bundleProduct.productImages;
 			bundleProduct.tags = req.body.tags ? req.body.tags : bundleProduct.tags;
+            bundleProduct.productCountry = req.body.productCountry ? req.body.productCountry : bundleProduct.productCountry; 
+            bundleProduct.manfactureDate = req.body.manfactureDate ? req.body.manfactureDate : bundleProduct.manfactureDate;
             bundleProduct.isBundle = true;
             bundleProduct.todaysDeal = req.body.todaysDeal ? req.body.todaysDeal : bundleProduct.todaysDeal;
             bundleProduct.publish = req.body.publish ? req.body.publish : bundleProduct.publish;
             bundleProduct.featured = req.body.featured ? req.body.featured : bundleProduct.featured;
-            bundleProduct.updated_at = new Date()
+            bundleProduct.mrp = req.body.mrp ? req.body.mrp : bundleProduct.mrp;
+            bundleProduct.purchasePrice  = req.body.purchasePrice ? req.body.purchasePrice : bundleProduct.purchasePrice;
+            bundleProduct.shippingCost = req.body.shippingCost ? req.body.shippingCost : bundleProduct.shippingCost;
+            bundleProduct.productTax = req.body.productTax ? req.body.productTax : bundleProduct.productTax;
+            bundleProduct.productDiscount = req.body.productDiscount ? req.body.productDiscount : bundleProduct.productDiscount;
+            bundleProduct.maxQuantity = req.body.maxQuantity ? req.body.maxQuantity : bundleProduct.maxQuantity;
+            bundleProduct.minimumQuantity = req.body.minimumQuantity ? req.body.minimumQuantity : bundleProducty.minimumQuantity;
+            bundleProduct.customersOptions = req.body.customersOptions ? req.body.customersOptions : bundleProduct.customersOptions;
+            bundleProduct.seoKeyWords =  req.body.seoKeyWords ? req.body.seoKeyWords : bundleProduct.seoKeyWords;
+            bundleProduct.metaTagKeywords = req.body.metaTagKeywords ? req.body.metaTagKeywords : bundleProduct.metaTagKeywords;
+            bundleProduct.metaTagDescription = req.body.metaTagDescription ? req.body.metaTagDescription : bundleProduct.metaTagDescription;
+            bundleProduct.metaTagTitle = req.body.metaTagTitle ? req.body.metaTagTitle : bundleProduct.metaTagTitle ;
+            bundleProduct.imageAltTag = req.body.imageAltTag ? req.body.imageAltTag : bundleProduct.imageAltTag;
+            bundleProduct.seoUrl  = req.body.seoUrl ? req.body.seoUrl : bundleProduct.seoUrl;
+            bundleProduct.youtubeVideoId = req.body.youtubeVideoId ? req.body.youtubeVideoId : bundleProduct.youtubeVideoId;
+            bundleProduct.question = req.body.question ? req.body.question : bundleProduct.question;
+            bundleProduct.blogPost = req.body.blogPost ? req.body.blogPost : bundleProduct.blogPost;
+            bundleProduct.similarProduct = req.body.similarProduct ? req.body.similarProduct : bundleProduct.similarProduct;
+            bundleProduct.delivery =  req.body.delivery ? req.body.delivery : bundleProduct.delivery;
+            bundleProduct.bulkDiscount = req.body.bulkDiscount ? req.body.bulkDiscount : bundleProduct.bulkDiscount;
+            bundleProduct.cashBack = req.body.cashBack ? req.body.cashBack :  bundleProduct.cashBack;
+            bundleProduct.variant = req.body.variant ? req.body.variant : bundleProduct.variant;
+            bundleProduct.updated_at = new Date();
 
             console.log(bundleProduct.isBundle)
+            let entryType = '';
             if(req.body.stock > getStock) {
                 entryType = 'Added'
             } else if (req.body.stock < getStock) {
@@ -208,7 +284,7 @@ module.exports = {
                 quantity:req.body.stock
             })
 
-			BundleproductModel.countDocuments({productCode: req.body.productCode}, function(err, count) {
+			BundleproductModel.countDocuments({productSku: req.body.productSku}, function(err, count) {
                 if(count>1) {
                     return res.status(500).json({
                         message: 'Product code already exist'
@@ -243,7 +319,9 @@ module.exports = {
     },
 
     removeImage: function (req, res) {
-        BundleproductModel.findOne({_id: req.body.id}, function(err, bundleProduct) {
+        BundleproductModel.findOne({_id: req.body.id}, async function(err, bundleProduct) {
+            gfs = await Grid(conn.db,  mongoose.mongo);
+            gfs.collection("uploads");
             if(err) {
                return res.status(500).json({
                    message: 'Error when deleting the products.',
@@ -255,17 +333,25 @@ module.exports = {
                    message: 'No such products'
                });
            } else {
+               //remove image from collection entry
                const ImagesArray = bundleProduct.productImages
                const productImageIndex= bundleProduct.productImages.indexOf(req.body.image)
                console.log(productImageIndex)
                ImagesArray.splice(productImageIndex, 1);
-               fs.unlink(req.body.image, (err) => {
-                   if (err) {
-                       console.log("failed to delete local image:" + err);
-                   } else {
-                       console.log('successfully deleted local image');
-                   }
-               });
+               
+               //remove image from grid storage
+               const getData = req.body.image.split('/');
+                const last = getData[getData.length - 1]
+                let getImage = last.toString();
+                console.log(getImage)
+                try {
+                    await gfs.remove({_id: getImage, root: 'uploads'});
+                } catch (error) {
+                    console.log(error);
+                    return res.status(500).json({
+                        message: "An error occured."
+                    });
+                }
                bundleProduct.save(function(err, SavedBundleProducts) {
                    if(err) {
                       return res.status(500).json({
@@ -289,22 +375,32 @@ module.exports = {
     remove: function (req, res) {
         var id = req.params.id;
 
-        BundleproductModel.findByIdAndRemove(id, function (err, bundleProduct) {
+        BundleproductModel.findByIdAndRemove(id, async function (err, bundleProduct) {
+            gfs = await Grid(conn.db,  mongoose.mongo);
+            gfs.collection("uploads");
             if (err) {
                 return res.status(500).json({
                     message: 'Error when deleting the bundleProduct.',
                     error: err
                 });
-            } if (bundleProduct.productImage == null) {
+            }
+            let getBundleProductsImages = bundleProduct.productImages;
+             if (bundleProduct.productImage == null) {
                 console.log('Product has no image')
             } else {
-                fs.unlink(bundleProduct.productImage, (err) => {
-                    if (err) {
-                        console.log("failed to delete local image:"+err);
-                    } else {
-                        console.log('successfully deleted local image');                                
-                    }
-                });
+                try {
+                    for (let index = 0; index < getBundleProductsImages.length; index++) {
+                        const getData = getBundleProductsImages[index].split('/');
+                        const last = getData[getData.length - 1]
+                        let getProductImage = last.toString();
+                        console.log(getProductImage)
+                        await gfs.remove({_id: getProductImage, root: 'uploads'});   
+                        }
+                    
+                } catch (error) {
+                    console.log(error);
+                    return res.status(500).json({message: "An error occured"});
+                }
             }
 
             return res.status(204).json();
@@ -312,7 +408,7 @@ module.exports = {
     },
 
     bulkDelete: function (req, res) {
-        var getProduct = any;
+        var getbundleProduct = any;
         const getId = req.body
         const query = { _id: { $in: getId } };
         console.log(query)
@@ -326,7 +422,9 @@ module.exports = {
             getbundleProduct = bundleproducts
         })
 
-        BundleproductModel.deleteMany(query, function (err) {
+        BundleproductModel.deleteMany(query, async function (err) {
+            gfs = await Grid(conn.db,  mongoose.mongo);
+            gfs.collection("uploads");
             if (err) {
                 return res.status(500).json({
                     message: 'Error when deleting the products.',
@@ -336,18 +434,22 @@ module.exports = {
             if(getbundleProduct.productImages = null) {
                 console.log('product has no image');
             }
-               for (let index = 0; index < getbundleProduct.length; index++) {
-                   let getBundleProductsImages = getbundleProduct[index].productImages
-                    for (let i = 0; i < getProductsImages.length; i++) {
-                        fs.unlink(getBundleProductsImages[i], (err) => {
-                            if (err) {
-                                console.log("failed to delete local image:" + err);
-                            } else {
-                                console.log('successfully deleted local image');
-                            }
-                        });
+            try {
+                for (let index = 0; index < getbundleProduct.length; index++) {
+                    let getBundleProductsImages = getbundleProduct[index].productImages
+                    for (let i = 0; i < getBundleProductsImages.length; i++) {
+                        const getData = getBundleProductsImages[index].split('/');
+                        const last = getData[getData.length - 1]
+                        let getImage = last.toString();
+                        console.log(getImage)
+                        await gfs.remove({_id: getImage, root: 'uploads'});   
                     }
-                }
+                 }
+                
+             } catch (error) {
+                 console.log(error);
+                 return res.status(500).json({message: "An error occured"});
+             }
             
 
             return res.status(200).json({

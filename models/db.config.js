@@ -1,7 +1,10 @@
-const mongoose = require('mongoose')
-mongoose.connect('mongodb://localhost:27017/webAdmin', {useNewUrlParser: true }, (err)=> {
-    if(!err) { console.log('MongoDB Connection Successded.') }
-    else { console.log('Error in DB connection :' + err ) }
+var db = require('mongoose')
+db.connect('mongodb://localhost:27017/webAdmin', {useNewUrlParser: true }, (err)=> {
+    if(!err) { 
+        console.log('MongoDB Connection Successded.') 
+    } else { 
+        console.log('Error in DB connection :' + err ) 
+    }
 });
 
 // require('./usersModel');

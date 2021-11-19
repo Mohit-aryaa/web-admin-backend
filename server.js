@@ -1,4 +1,6 @@
-require('./models/db.config')
+//require('./models/db.config')
+require("dotenv").config();
+const connection = require('./db')
 const express = require('express');
 const ClientRoutes = require('./routes/ClientRoutes');
 const UsersRoutes = require('./routes/usersRoutes');
@@ -8,6 +10,7 @@ const categoryRoute = require('./routes/categoryRoutes');
 const brandRoute = require('./routes/brandRoutes');
 const vendorRoute = require('./routes/vendorRoutes');
 const subcategoryRoute = require('./routes/subCategoryRoutes');
+const subChildCategories = require('./routes/subChildCategoryRoutes')
 const bundelProductsRoute = require('./routes/bundleProductRoutes');
 const stockLogsRoute = require('./routes/stockLogsRoutes');
 const shippingRoute = require('./routes/shippingRoutes');
@@ -16,7 +19,10 @@ const bodypasrer = require('body-parser');
 const cors = require('cors');
 const app = express();
 var multer = require('multer');
- 
+const GridFsStorage = require('multer-gridfs-storage');
+const mongoose = require("mongoose");
+
+//const methodOverride = require('method-override')
 
 const swaggerUi = require('swagger-ui-express'),
 swaggerDocument = require('./swagger.json');
@@ -34,6 +40,7 @@ app.use('/categories', categoryRoute);
 app.use('/brands', brandRoute);
 app.use('/vendors', vendorRoute);
 app.use('/subcategories', subcategoryRoute);
+app.use('/subChildCategories', subChildCategories)
 app.use('/bundleProducts', bundelProductsRoute);
 app.use('/stockLogs', stockLogsRoute)
 app.use('/shippings', shippingRoute)
@@ -47,4 +54,5 @@ app.use(function(req, res, next) {
 
 app.use('/api-docs',swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
-app.listen(3000)
+const port = process.env.PORT || 3000;
+app.listen(port, console.log(`Listening on port ${port}...`))

@@ -5,7 +5,7 @@ var productsSchema = new Schema({
 	'productName' : String,
 	'productDescription': String,
 	'productImages' : Array,
-	'productCode' : String,
+	'productSku' : String,
 	'productModel': String,
 	'productCountry': String,
 	'manfactureDate': String,
@@ -18,6 +18,10 @@ var productsSchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref: 'subCategory'
 	},
+	'productSubChildCategory' : {
+		type: Schema.Types.ObjectId,
+		ref: 'subChildCategory'
+	},
 	'productBrand'  : {
 		type: Schema.Types.ObjectId,
 		ref: 'brand'
@@ -26,10 +30,13 @@ var productsSchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref: 'vendor'
 	},
+	'unit': String,
+	'dimensions': Object,
+	'weight': String,
    'tags' : Object,
    'isBundle': Boolean,
 	'todaysDeal' : Boolean,
-	'publish' : Boolean,
+	'publish' : String,
 	'featured' : Boolean,
 	'price' : String,
 	'mrp' : String,
@@ -53,7 +60,7 @@ var productsSchema = new Schema({
 	'similarProduct': Object,
 	'delivery':  Object,
 	'bulkDiscount' : Object,
-	'cashback' : Object,
+	'cashBack' : Object,
 	'variant' : String,
 	'created_at': String,
 	'updated_at': String

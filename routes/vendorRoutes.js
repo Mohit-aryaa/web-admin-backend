@@ -19,6 +19,8 @@ router.post('/', vendorController.create);
 
 router.post('/bulkDelete', vendorController.bulkDelete);
 
+
+
 /*
  * PUT
  */

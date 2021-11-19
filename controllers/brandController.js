@@ -1,4 +1,12 @@
 var BrandModel = require('../models/brandModel.js');
+const fs = require('fs');
+const connection = require("../db");
+//const { any } = require('../middleware/upload.js');
+const mongoose = require("mongoose");
+const Grid = require("gridfs-stream");
+let gfs;
+connection();
+const conn = mongoose.connection;
 
 /**
  * brandController.js
@@ -76,6 +84,10 @@ module.exports = {
         var brand = new BrandModel({
 			brandName : req.body.brandName,
 			brandDescription : req.body.brandDescription,
+            brandBanner : req.body.brandBanner,
+            metaTitle: req.body.metaTitle,
+            metaDescription: req.body.metaDescription,
+            seoUrl: req.body.seoUrl,
             created_at : new Date(),
             updated_at: 'none'
         });
@@ -98,7 +110,9 @@ module.exports = {
     update: function (req, res) {
         var id = req.params.id;
 
-        BrandModel.findOne({_id: id}, function (err, brand) {
+        BrandModel.findOne({_id: id}, async function (err, brand) {
+            gfs = await Grid(conn.db,  mongoose.mongo);
+            gfs.collection("uploads");
             if (err) {
                 return res.status(500).json({
                     message: 'Error when getting brand',
@@ -111,16 +125,31 @@ module.exports = {
                     message: 'No such brand'
                 });
             }
-
+            const getData = brand.brandBanner.split('/');
+            const last = getData[getData.length - 1]
+            const getBrandBanner = last.toString();
             brand.brandName = req.body.brandName ? req.body.brandName : brand.brandName;
 			brand.brandDescription = req.body.brandDescription ? req.body.brandDescription : brand.brandDescription;
+            brand.brandBanner = req.body.brandBanner ? req.body.brandBanner : brand.brandBanner;
+            brand.metaTitle = req.body.metaTitle ? req.body.metaTitle : brand.metaTitle;
+            brand.metaDescription = req.body.metaDescription ? req.body.metaDescription : brand.metaDescription;
+            brand.seoUrl = req.body.seoUrl ? req.body.seoUrl :  brand.seoUrl;
 			brand.updated_at = new Date();
-            brand.save(function (err, brand) {
+            brand.save(async function (err, brand)  {
                 if (err) {
                     return res.status(500).json({
                         message: 'Error when updating brand.',
                         error: err
                     });
+                } else {
+                     if(req.body.brandBanner !== undefined) {
+                        try {
+                            await gfs.remove({_id: getBrandBanner, root: 'uploads'});
+                        } catch (error) {
+                            console.log(error);
+                            res.send("An error occured.");
+                        }
+                    }
                 }
 
                 return res.json(brand);
@@ -128,40 +157,133 @@ module.exports = {
         });
     },
 
+    // store:  function (req, res) {
+    //     //console.log('req', req.files)
+    //     if (req.file) {
+    //         return res.json({
+    //             imagePath: req.file.path
+    //         })
+    //     } 
+    // },
+
+    upload: function(req, res) {
+        if (req.file === undefined) 
+        return res.send("you must select a file.");
+        //console.log(req.file)
+        
+        const imgUrl = `http://localhost:3000/brands/file/${req.file.id}`;
+        return res.json({
+            imagePath: imgUrl
+        })
+    },
+
+    getFile: async function(req, res) {
+        gfs = await Grid(conn.db,  mongoose.mongo);
+        gfs.collection("uploads");
+        try {
+            //console.log('req.params.id', req.params.id)
+            const file = await gfs.files.find(new mongoose.Types.ObjectId(req.params.id)).toArray();
+            //console.log('file', file[0])
+            const readStream = gfs.createReadStream(file[0].filename);
+            readStream.pipe(res);
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({
+                message:"not found" , 
+                error: error.message
+            }) ;
+        }
+    },
+
     /**
      * brandController.remove()
      */
     remove: function (req, res) {
         var id = req.params.id;
-
-        BrandModel.findByIdAndRemove(id, function (err, brand) {
+        let getBrandBanner = '';
+        BrandModel.findOne({_id: id} ,function (err, brand) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when deleting the brand.',
                     error: err
                 });
             }
-
-            return res.status(204).json();
+            const getData = brand.brandBanner.split('/');
+            const last = getData[getData.length - 1]
+            getBrandBanner = last.toString();
+        });
+        BrandModel.findByIdAndRemove(id, async function (err, brand) {
+            gfs = await Grid(conn.db,  mongoose.mongo);
+            gfs.collection("uploads");
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when deleting the brand.',
+                    error: err
+                });
+            }
+            else {
+                try {
+                    await gfs.remove({_id: getBrandBanner, root: 'uploads'});
+                    //await gfs.files.deleteOne({_id: new mongoose.Types.ObjectId(getBrandBanner)});
+                    
+                } catch (error) {
+                    console.log(error);
+                    res.send("An error occured.");
+                }
+            }
+            return res.status(200).json({
+                message: "Brand deleted successfully"
+            });
         });
     },
 
     bulkDelete: function (req, res) {
+        var getBrands = [];
         const getId = req.body
-        const query = { _id: { $in: getId} };
+        const query = { _id: { $in: getId } };
         console.log(query)
-        
-        
-        BrandModel.deleteMany(query, function (err) {
+        BrandModel.find(query, async function (err, brands) {
             if (err) {
                 return res.status(500).json({
-                    message: 'Error when deleting the products.',
+                    message: 'Error when fetcching the products.',
                     error: err
                 });
             }
+            getBrands = await brands
+        })
+
+        BrandModel.deleteMany(query, async function (err) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when deleting the Brand.',
+                    error: err
+                });
+            } 
+            if(getBrands == null) {
+                console.log('Brand has no banner');
+            } 
+            else {
+                gfs = await Grid(conn.db,  mongoose.mongo);
+                gfs.collection("uploads");
+                try {
+                    for (let index = 0; index < getBrands.length; index++) {
+                        const getData = getBrands[index].brandBanner.split('/');
+                        const last = getData[getData.length - 1]
+                        let getBrandBanner = last.toString();
+                        console.log(getBrandBanner)
+                        await gfs.remove({_id: getBrandBanner, root: 'uploads'});
+                        //await gfs.files.deleteOne({_id: new mongoose.Types.ObjectId(getBrandBanner)});   
+                     }
+                    
+                 } catch (error) {
+                     console.log(error);
+                     return res.status(500).json({message: "An error occured"});
+                 }
+               
+            }
             
             return res.status(200).json({
-                message: 'Products deleted successfully'
+                message: 'Brands deleted successfully'
             });
 
         });

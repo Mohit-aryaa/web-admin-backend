@@ -1,5 +1,12 @@
 var SubcategoryModel = require('../models/subCategoryModel.js');
-var CategoryModel = require('../models/categoryModel.js');
+const fs = require('fs');
+const connection = require("../db");
+//const { any } = require('../middleware/upload.js');
+const mongoose = require("mongoose");
+const Grid = require("gridfs-stream");
+let gfs;
+connection();
+const conn = mongoose.connection;
 
 /**
  * subCategoryController.js
@@ -46,7 +53,7 @@ module.exports = {
         }).populate('category').sort({_id:-1});
     },
 
-    listCategoryData: function (req, res) {
+    listDataByCategoryId: function (req, res) {
         var id = req.params.id;
 
         SubcategoryModel.find({category: id}, function (err, subCategory) {
@@ -57,7 +64,7 @@ module.exports = {
                 });
             }
 
-            
+            //console.log(subCategory)
             let total = subCategory.length;
             return res.json({
                 total: total,
@@ -96,8 +103,12 @@ module.exports = {
     create: function (req, res) {
         var subCategory = new SubcategoryModel({
 			subCategoryName : req.body.subCategoryName,
-			subCategoryDescription : req.body.subCategoryDescription,
             category: req.body.category,
+            subCategoryBanner : req.body.subCategoryBanner,
+            metaTitle: req.body.metaTitle,
+            metaDescription:  req.body.metaDescription,
+            seoUrl: req.body.seoUrl,
+            subCategoryDescription: req.body.subCategoryDescription,
             created_at : new Date(),
             updated_at: 'none'
         });
@@ -120,7 +131,9 @@ module.exports = {
     update: function (req, res) {
         var id = req.params.id;
 
-        SubcategoryModel.findOne({_id: id}, function (err, subCategory) {
+        SubcategoryModel.findOne({_id: id}, async function (err, subCategory) {
+            gfs = await Grid(conn.db,  mongoose.mongo);
+            gfs.collection("uploads");
             if (err) {
                 return res.status(500).json({
                     message: 'Error when getting subCategory',
@@ -134,16 +147,32 @@ module.exports = {
                 });
             }
 
+            const getData = subCategory.subCategoryBanner.split('/');
+            const last = getData[getData.length - 1]
+            const getSubCategoryBanner = last.toString();
             subCategory.subCategoryName = req.body.subCategoryName ? req.body.subCategoryName : subCategory.subCategoryName;
-			subCategory.subCategoryDescription = req.body.subCategoryDescription ? req.body.subCategoryDescription : subCategory.subCategoryDescription;
 			subCategory.category = req.body.category ? req.body.category : subCategory.category;
+            subCategory.subCategoryBanner = req.body.subCategoryBanner ? req.body.subCategoryBanner : subCategory.subCategoryBanner;
+            subCategory.metaTitle = req.body.metaTitle ? req.body.metaTitle : subCategory.metaTitle;
+            subCategory.metaDescription =  req.body.metaDescription ? req.body.metaDescription : subCategory.metaDescription;
+            subCategory.seoUrl = req.body.seoUrl ? req.body.seoUrl : subCategory.seoUrl;
+            subCategory.subCategoryDescription = req.body.subCategoryDescription ? req.body.subCategoryDescription : subCategory.subCategoryDescription;
             subCategory.updated_at = new Date()
-            subCategory.save(function (err, subCategory) {
+            subCategory.save(async function (err, subCategory) {
                 if (err) {
                     return res.status(500).json({
                         message: 'Error when updating subCategory.',
                         error: err
                     });
+                } else {
+                     if(req.body.SubchildcategoryBanner !== undefined) {
+                        try {
+                            await gfs.remove({_id: getSubCategoryBanner, root: 'uploads'});;
+                        } catch (error) {
+                            console.log(error);
+                            res.send("An error occured.");
+                        }
+                    }
                 }
 
                 return res.json(subCategory);
@@ -151,44 +180,127 @@ module.exports = {
         });
     },
 
+    upload: function(req, res) {
+        if (req.file === undefined) 
+        return res.send("you must select a file.");
+        //console.log(req.file)
+        
+        const imgUrl = `http://localhost:3000/subCategories/file/${req.file.id}`;
+        return res.json({
+            imagePath: imgUrl
+        })
+    },
+
+    getFile: async function(req, res) {
+        gfs = await Grid(conn.db,  mongoose.mongo);
+        gfs.collection("uploads");
+        try {
+            //console.log('req.params.id', req.params.id)
+            const file = await gfs.files.find(new mongoose.Types.ObjectId(req.params.id)).toArray();
+            //console.log('file', file[0])
+            const readStream = gfs.createReadStream(file[0].filename);
+            readStream.pipe(res);
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({
+                message:"not found" , 
+                error: error.message
+            }) ;
+        }
+    },
     /**
      * subCategoryController.remove()
      */
     remove: function (req, res) {
+        let getSubCategoryBanner = '';
         var id = req.params.id;
-
-        SubcategoryModel.findByIdAndRemove(id, function (err, subCategory) {
+        SubcategoryModel.findOne({_id: id} ,function (err, subCategory) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when deleting the brand.',
+                    error: err
+                });
+            }
+            const getData = subCategory.subCategoryBanner.split('/');
+            const last = getData[getData.length - 1]
+            getSubCategoryBanner = last.toString();
+        });
+        SubcategoryModel.findByIdAndRemove(id, async function (err, subCategory) {
+            gfs = await Grid(conn.db,  mongoose.mongo);
+            gfs.collection("uploads");
             if (err) {
                 return res.status(500).json({
                     message: 'Error when deleting the subCategory.',
                     error: err
                 });
+            }  
+            if(subCategory.subCategoryBanner == null) {
+                console.log('sub Category has no banner');
+            } 
+            else {
+                try {
+                    await gfs.remove({_id: getSubCategoryBanner, root: 'uploads'});
+                } catch (error) {
+                    console.log(error);
+                    res.send("An error occured.");
+                }
             }
 
-            return res.status(204).json();
+            return res.status(200).json({
+                message: "Subcategory deleted successfully"
+            });
         });
     },
 
     bulkDelete: function (req, res) {
+        var getSubCategory = [];
         const getId = req.body
-        const query = { _id: { $in: getId} };
+        const query = { _id: { $in: getId } };
         console.log(query)
-        
-        
-        SubcategoryModel.deleteMany(query, function (err) {
+        SubcategoryModel.find(query, function (err, subCategories) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when fetcching the products.',
+                    error: err
+                });
+            }
+            getSubCategory = subCategories;
+        })
+
+        SubcategoryModel.deleteMany(query, async function (err) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when deleting the products.',
                     error: err
                 });
+            } 
+            if(getSubCategory == null) {
+                console.log('Sub Category has no banner');
+            } 
+            else {
+                gfs = await Grid(conn.db,  mongoose.mongo);
+                gfs.collection("uploads");
+                try {
+                    for (let index = 0; index < getSubCategory.length; index++) {
+                        const getData = getSubCategory[index].subCategoryBanner.split('/');
+                        const last = getData[getData.length - 1]
+                        let getSubCategoryBanner = last.toString();
+                        console.log(getSubCategoryBanner)
+                        await gfs.remove({_id: getSubCategoryBanner, root: 'uploads'});;   
+                     }
+                    
+                 } catch (error) {
+                     console.log(error);
+                     return res.status(500).json({message: "An error occured"});
+                 }
+               
             }
             
             return res.status(200).json({
-                message: 'Products deleted successfully'
+                message: 'Sub Categories deleted successfully'
             });
 
         });
     }
-
 
 };

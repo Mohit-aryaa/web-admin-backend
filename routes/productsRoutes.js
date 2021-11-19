@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var productsController = require('../controllers/productsController.js');
-const upload = require('../middleware/upload');
+//const upload = require('../middleware/upload');
+const upload = require("../middleware/upload-image");
 /*
  * GET
  */
@@ -24,7 +25,11 @@ router.post('/',  productsController.create);
 // router.post('/stock', productsController.createStock);
 
 
-router.post('/store', upload.array('images[]'), productsController.store);
+//router.post('/store', upload.array('images[]'), productsController.store);
+
+router.post('/upload',  upload.array("images[]"), productsController.upload);
+
+router.get("/file/:id", productsController.getFile)
 
 router.post('/bulkDelete', productsController.bulkDelete);
 
