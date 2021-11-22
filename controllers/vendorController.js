@@ -166,8 +166,8 @@ module.exports = {
 			vendor.active = req.body.active ? req.body.active : vendor.active;
             vendor.updated_at = new Date();
 			
-            VendorModel.countDocuments({ email: req.body.email }, function (err, count) {
-                if (count > 1) {
+            VendorModel.countDocuments({ email: vendor.email }, function (err, count) {
+                if (count > 0) {
                     return res.status(500).json({
                         message: 'Vendor with this email already exists'
                     });

@@ -36,7 +36,7 @@ var productsSchema = new Schema({
    'tags' : Object,
    'isBundle': Boolean,
 	'todaysDeal' : Boolean,
-	'publish' : String,
+	'publish' : Boolean,
 	'featured' : Boolean,
 	'price' : String,
 	'mrp' : String,

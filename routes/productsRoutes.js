@@ -31,7 +31,17 @@ router.post('/upload',  upload.array("images[]"), productsController.upload);
 
 router.get("/file/:id", productsController.getFile)
 
+router.post('/bulkPublish', productsController.bulkPublish);
+
+router.post('/bulkUnpublish', productsController.bulkUnpublish);
+
 router.post('/bulkDelete', productsController.bulkDelete);
+
+router.post('/setPublish', productsController.setPublish);
+
+router.post('/setTodaysDeal', productsController.setTodaysDeal);
+
+router.post('/setFeatured', productsController.setFeatured);
 
 /*
  * PUT

@@ -1,5 +1,4 @@
-var CategoryModel = require('../models/categoryModel.js');
-const fs = require('fs');
+var ConsultantModel = require('../models/consultantModel.js');
 const connection = require("../db");
 //const { any } = require('../middleware/upload.js');
 const mongoose = require("mongoose");
@@ -8,14 +7,14 @@ let gfs;
 connection();
 const conn = mongoose.connection;
 /**
- * categoryController.js
+ * consultantController.js
  *
- * @description :: Server-side logic for managing categorys.
+ * @description :: Server-side logic for managing consultants.
  */
 module.exports = {
 
     /**
-     * categoryController.list()
+     * consultantController.list()
      */
     list: function (req, res) {
         let offset = parseInt(req.query.offset) || 0;
@@ -24,128 +23,140 @@ module.exports = {
 
         let from = (offset * size) || 0;
         let to = (from + size) || 10;
-        CategoryModel.find(function (err, categories) {
+        ConsultantModel.find(function (err, consultants) {
             if (err) {
                 return res.status(500).json({
-                    message: 'Error when getting category.',
+                    message: 'Error when getting consultant.',
                     error: err
                 });
             } else {
                 if (filter) {
-                    categories = categories.filter(el => {
+                    consultants = consultants.filter(el => {
                         let el2 = JSON.parse(JSON.stringify(el))
                         for(let key in el2) {
-                            let test = el[key]?.toString().toLowerCase().includes(filter.toLowerCase())
-                            if(test) {
+                            let checkConsultant = el[key]?.toString().toLowerCase().includes(filter.toLowerCase())
+                            if(checkConsultant) {
                                 return true;
                             }
                         }
                         return false;
                     })
                 }
-                let Categories = categories.slice(from, to);
+                let Consultants = consultants.slice(from, to);
                 res.status(200).json({
-                    total: categories.length,
-                    Categories
+                    total: consultants.length,
+                    Consultants
                 });
             }
-        }).sort({_id: -1 });
+        }).sort({_id:-1});
     },
 
     /**
-     * categoryController.show()
+     * consultantController.show()
      */
     show: function (req, res) {
         var id = req.params.id;
 
-        CategoryModel.findOne({_id: id}, function (err, category) {
+        ConsultantModel.findOne({_id: id}, function (err, consultant) {
             if (err) {
                 return res.status(500).json({
-                    message: 'Error when getting category.',
+                    message: 'Error when getting consultant.',
                     error: err
                 });
             }
 
-            if (!category) {
+            if (!consultant) {
                 return res.status(404).json({
-                    message: 'No such category'
+                    message: 'No such consultant'
                 });
             }
 
-            return res.json(category);
+            return res.json(consultant);
         });
     },
 
     /**
-     * categoryController.create()
+     * consultantController.create()
      */
     create: function (req, res) {
-        var category = new CategoryModel({
-			categoryName : req.body.categoryName,
-			categoryBanner: req.body.categoryBanner,
-            categoryDescription: req.body.categoryDescription,
-            metaTitle: req.body.metaTitle,
-            metaDescription: req.body.metaDescription,
-            seoUrl: req.body.seoUrl,
+        var consultant = new ConsultantModel({
+			logo : req.body.logo,
+			displayName : req.body.displayName,
+			name : req.body.name,
+            email : req.body.email,
+            phone : req.body.phone,
+			company : req.body.company,
+			address : req.body.address,
+            bankAccountType: req.body.bankAccountType,
+            bankAccountName : req.body.bankAccountName,
+            bankAccountDetails: req.body.bankAccountDetails,
+            panNumber: req.body.panNumber,
+            gstNumber: req.body.gstNumber,
+            memberShip: req.body.memberShip,
+            status: req.body.status,
             created_at : new Date(),
             updated_at: 'none'
         });
 
-        category.save(function (err, category) {
+        consultant.save(function (err, consultant) {
             if (err) {
                 return res.status(500).json({
-                    message: 'Error when creating category',
+                    message: 'Error when creating consultant',
                     error: err
                 });
             }
 
-            return res.status(201).json(category);
+            return res.status(201).json(consultant);
         });
     },
 
     /**
-     * categoryController.update()
+     * consultantController.update()
      */
     update: function (req, res) {
         var id = req.params.id;
 
-        CategoryModel.findOne({_id: id}, async function (err, category) {
-            gfs = await Grid(conn.db,  mongoose.mongo);
-            gfs.collection("uploads");
+        ConsultantModel.findOne({_id: id}, function (err, consultant) {
             if (err) {
                 return res.status(500).json({
-                    message: 'Error when getting category',
+                    message: 'Error when getting consultant',
                     error: err
                 });
             }
 
-            if (!category) {
+            if (!consultant) {
                 return res.status(404).json({
-                    message: 'No such category'
+                    message: 'No such consultant'
                 });
             }
-
-            const getData = category.categoryBanner.split('/');
+            const getData = consultant.logo.split('/');
             const last = getData[getData.length - 1]
-            const getCategoryBanner = last.toString();
-            category.categoryName = req.body.categoryName ? req.body.categoryName : category.categoryName;
-			category.categoryDescription = req.body.categoryDescription ? req.body.categoryDescription : category.categoryDescription;
-			category.categoryBanner = req.body.categoryBanner ?  req.body.categoryBanner : category.categoryBanner;
-            category.categoryDescription = req.body.categoryDescription ? req.body.categoryDescription : category.categoryDescription;
-            category.metaTitle = req.body.metaTitle ? req.body.metaTitle : category.metaTitle;
-            category.metaDescription = req.body.metaDescription ? req.body.metaDescription : category.metaDescription;
-            category.seoUrl = req.body.seoUrl ? req.body.seoUrl : category.seoUrl;
-            category.updated_at = new Date();
-            category.save(async function (err, category) {
+            const getConsultantlogo = last.toString();
+            consultant.logo = req.body.logo ? req.body.logo : consultant.logo;
+			consultant.displayName = req.body.displayName ? req.body.displayName : consultant.displayName;
+			consultant.name = req.body.name ? req.body.name : consultant.name;
+			consultant.email = req.body.email ? req.body.email : consultant.email;
+			consultant.phone = req.body.phone ? req.body.phone : consultant.phone;
+			consultant.company = req.body.company ? req.body.company : consultant.company;
+			consultant.address = req.body.address ? req.body.address : consultant.address;
+            consultant.bankAccountType = req.body.bankAccountType ? req.body.bankAccountType : consultant.bankAccountType;
+            consultant.bankAccountName = req.body.bankAccountName ? consultant.bankAccountName : consultant.bankAccountName;
+            consultant.bankAccountDetails = req.body.bankAccountDetails ?  req.body.bankAccountDetails : consultant.bankAccountDetails;
+            consultant.panNumber = req.body.panNumber ?  req.body.panNumber : consultant.panNumber;
+            consultant.gstNumber = req.body.gstNumber ? req.body.gstNumber : consultant.gstNumber;
+            consultant.memberShip = req.body.memberShip ? req.body.memberShip : consultant.memberShip; 
+            consultant.status = req.body.status ? req.body.status: consultant.status; 
+			consultant.updated_at = new Date();
+            consultant.save(async function (err, consultant) {
                 if (err) {
                     return res.status(500).json({
-                        message: 'Error when updating category.',
+                        message: 'Error when updating consultant.',
                         error: err
                     });
                 } else {
-                    if(req.body.categoryBanner !== undefined) {
+                    if(req.body.logo !== undefined) {
                         try {
-                            await gfs.remove({_id: getCategoryBanner, root: 'uploads'});
+                            await gfs.remove({_id: getConsultantlogo, root: 'uploads'});
                         } catch (error) {
                             console.log(error);
                             res.send("An error occured.");
@@ -153,18 +164,15 @@ module.exports = {
                     }
                 }
 
-                return res.json(category);
+                return res.json(consultant);
             });
         });
     },
 
-
     upload: function(req, res) {
         if (req.file === undefined) 
         return res.send("you must select a file.");
-        //console.log(req.file)
-        
-        const imgUrl = `http://localhost:3000/categories/file/${req.file.id}`;
+        const imgUrl = `http://localhost:3000/consultants/file/${req.file.id}`;
         return res.json({
             imagePath: imgUrl
         })
@@ -189,28 +197,28 @@ module.exports = {
     },
 
     /**
-     * categoryController.remove()
+     * consultantController.remove()
      */
     remove: function (req, res) {
-        let getCategoryBanner = '';
+        let getConsultantLogo = '';
         var id = req.params.id;
-        CategoryModel.findOne({_id: id} ,function (err, category) {
+        ConsultantModel.findOne({_id: id} ,function (err, getConsultant) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when deleting the category.',
                     error: err
                 });
             }
-            const getData = category.categoryBanner.split('/');
+            const getData = getConsultant.Logo.split('/');
             const last = getData[getData.length - 1]
-            getCategoryBanner = last.toString();
+            getConsultantLogo = last.toString();
         });
-        CategoryModel.findByIdAndRemove(id, async function (err, category) {
+        ConsultantModel.findByIdAndRemove(id, async function (err, consultant) {
             gfs = await Grid(conn.db,  mongoose.mongo);
             gfs.collection("uploads");
             if (err) {
                 return res.status(500).json({
-                    message: 'Error when deleting the category.',
+                    message: 'Error when deleting the consultant.',
                     error: err
                 });
             }
@@ -222,48 +230,48 @@ module.exports = {
                     res.send("An error occured.");
                 }
             }
-            return res.status(200).json({
-                message: "Category deleted successfully"
-            });
 
+            return res.status(200).json({
+                message: "Consultant deleted successfully"
+            });
         });
     },
 
     bulkDelete: function (req, res) {
-        var getCategory = [];
+        var getConsultant = [];
         const getId = req.body;
         const query = { _id: { $in: getId } };
         console.log(query)
-        CategoryModel.find(query, async function (err, categories) {
+        ConsultantModel.find(query, async function (err, consultant) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when fetcching the products.',
                     error: err
                 });
             }
-            getCategory = await categories
+            getConsultant = await consultant
         })
 
-        CategoryModel.deleteMany(query, async function (err) {
+        ConsultantModel.deleteMany(query, async function (err) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when deleting the products.',
                     error: err
                 });
             } 
-            if(getCategory == null) {
-                console.log('Category has no banner');
+            if(getConsultant == null) {
+                console.log('Consultant has no banner');
             } 
             else {
                 gfs = await Grid(conn.db,  mongoose.mongo);
                 gfs.collection("uploads");
                 try {
-                    for (let index = 0; index < getCategory.length; index++) {
-                        const getData = getCategory[index].categoryBanner.split('/');
+                    for (let index = 0; index < getConsultant.length; index++) {
+                        const getData = getConsultant[index].logo.split('/');
                         const last = getData[getData.length - 1]
-                        let getCategoryBanner = last.toString();
-                        console.log(getCategoryBanner)
-                        await gfs.remove({_id: getCategoryBanner, root: 'uploads'});   
+                        let getConsultantLogo = last.toString();
+                        console.log(getConsultantLogo)
+                        await gfs.remove({_id: getConsultantLogo, root: 'uploads'});   
                      }
                     
                  } catch (error) {
@@ -274,10 +282,9 @@ module.exports = {
             }
             
             return res.status(200).json({
-                message: 'Category deleted successfully'
+                message: 'Consultants deleted successfully'
             });
 
         });
     }
-
 };

@@ -26,8 +26,17 @@ router.post('/upload',  upload.array("images[]"), bundleProductController.upload
 
 router.get("/file/:id", bundleProductController.getFile)
 
+router.post('/bulkUnpublish', bundleProductController.bulkUnpublish);
 
 router.post('/bulkDelete', bundleProductController.bulkDelete);
+
+router.post('/bulkDelete', bundleProductController.bulkDelete);
+
+router.post('/setPublish', bundleProductController.setPublish);
+
+router.post('/setTodaysDeal', bundleProductController.setTodaysDeal);
+
+router.post('/setFeatured', bundleProductController.setFeatured);
 /*
  * PUT
  */

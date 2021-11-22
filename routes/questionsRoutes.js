@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var questionsController = require('../controllers/questionsController.js');
+const { route } = require('./consultantRoutes.js');
 
 /*
  * GET
@@ -18,6 +19,8 @@ router.get('/:id', questionsController.show);
 router.post('/', questionsController.create);
 
 router.post('/bulkDelete', questionsController.bulkDelete);
+
+
 
 /*
  * PUT

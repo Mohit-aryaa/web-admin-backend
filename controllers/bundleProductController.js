@@ -201,6 +201,102 @@ module.exports = {
         }
     },
 
+    setPublish: function(req, res) {
+        const id = req.body.id;
+        let setMessage = '';
+        console.log('publish',req.body.publish)
+        BundleproductModel.findOne({ _id: id }, async function (err, setProducts) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when getting products',
+                    error: err
+                });
+            }
+            setProducts.publish = req.body.publish;
+            await setProducts.save(function (err, savedProducts) {
+                if (err) {
+                    return res.status(500).json({
+                        message: 'Error when updating products.',
+                        error: err
+                    });
+                }
+                console.log('afterResult', savedProducts.publish)
+                if(savedProducts.publish == true) {
+                    setMessage = 'product published'
+                } else {
+                    setMessage = 'Product Unpublished'
+                }
+                return res.status(200).json({
+                    message: setMessage
+                })
+            });
+        });
+    },
+
+    setTodaysDeal: function(req, res) {
+        const id = req.body.id;
+        let setMessage = '';
+        console.log('todaysDeal',req.body.todaysDeal)
+        BundleproductModel.findOne({ _id: id }, async function (err, setProducts) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when getting products',
+                    error: err
+                });
+            }
+            setProducts.todaysDeal = req.body.todaysDeal;
+            await setProducts.save(function (err, savedProducts) {
+                if (err) {
+                    return res.status(500).json({
+                        message: 'Error when updating products.',
+                        error: err
+                    });
+                }
+                console.log('afterResult', savedProducts.todaysDeal)
+                if(savedProducts.todaysDeal == true) {
+                    setMessage = 'Added to Today\'s deal'
+                } else {
+                    setMessage = 'Removed from Today\'s deal'
+                }
+                return res.status(200).json({
+                    message: setMessage
+                })
+            });
+        });
+    },
+
+    setFeatured: function(req, res) {
+        const id = req.body.id;
+        let setMessage = '';
+        console.log('feature',req.body.featured)
+        BundleproductModel.findOne({ _id: id }, async function (err, setProducts) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when getting products',
+                    error: err
+                });
+            }
+            setProducts.featured = req.body.featured;
+            await setProducts.save(function (err, savedProducts) {
+                if (err) {
+                    return res.status(500).json({
+                        message: 'Error when updating products.',
+                        error: err
+                    });
+                }
+                console.log('afterResult', savedProducts.publish)
+                if(savedProducts.featured == true) {
+                    setMessage = 'product featured'
+                } else {
+                    setMessage = 'Product unFeatured'
+                }
+                return res.status(200).json({
+                    message: setMessage
+                })
+            });
+        });
+    },
+
     /**
      * bundleProductController.update()
      */
@@ -407,6 +503,52 @@ module.exports = {
         });
     },
 
+    bulkPublish: function (req, res) {
+        var getId = req.body;
+        const query = { _id: { $in: getId } };
+        const setQuery = {$set : { publish: true} };
+        console.log(getId.length)
+        BundleproductModel.updateMany(query,setQuery , {
+            multi: true
+        }, function (err, products) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when Unpublishing products',
+                    error: err
+                });
+            }
+            
+        });
+        
+        return res.status(200).json({
+            message: 'Products Published successfully'
+        });
+    },
+
+
+    bulkUnpublish : function (req, res) {
+        var getId = req.body;
+        const query = { _id: { $in: getId } };
+        const setQuery = {$set : { publish: false} };
+        console.log(getId.length)
+        BundleproductModel.updateMany(query,setQuery , {
+            multi: true
+        }, function (err, products) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when Unpublishing products',
+                    error: err
+                });
+            }
+            
+        });
+                
+        
+        return res.status(200).json({
+            message: 'Products Unpublished successfully'
+        });
+    },
+
     bulkDelete: function (req, res) {
         var getbundleProduct = any;
         const getId = req.body
@@ -415,7 +557,7 @@ module.exports = {
         BundleproductModel.find(query, function (err, bundleproducts) {
             if (err) {
                 return res.status(500).json({
-                    message: 'Error when fetcching the products.',
+                    message: 'Error when fetching the products.',
                     error: err
                 });
             }
