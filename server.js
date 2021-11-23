@@ -16,7 +16,8 @@ const stockLogsRoute = require('./routes/stockLogsRoutes');
 const shippingRoute = require('./routes/shippingRoutes');
 const questionsRoute = require('./routes/questionsRoutes');
 const consultants = require('./routes/consultantRoutes');
-const coupons = require('./routes/couponRoutes')
+const coupons = require('./routes/couponRoutes');
+const servicesRoutes = require('./routes/servicesRoutes');
 const bodypasrer = require('body-parser');
 const cors = require('cors');
 const app = express();
@@ -49,6 +50,7 @@ app.use('/shippings', shippingRoute)
 app.use('/questions', questionsRoute)
 app.use('/consultants', consultants);
 app.use('/coupons', coupons)
+app.use('/services', servicesRoutes);
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
