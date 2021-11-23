@@ -3,7 +3,7 @@ var Schema   = mongoose.Schema;
 
 var servicesSchema = new Schema({
     'productTitle': String,
-    'productImages': String,
+    'productImages': Array,
     'productDescription': String,
     'productCategory': {
         type:Schema.Types.ObjectId,

@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var servicesController = require('../controllers/servicesController.js');
+var servicesController = require('../controllers/servicesController');
 //const upload = require('../middleware/upload');
 const upload = require("../middleware/upload-image");
 /*
@@ -8,7 +8,6 @@ const upload = require("../middleware/upload-image");
  */
 router.get('/', servicesController.list);
 
-router.get('/stock', servicesController.listStock);
 
 /*
  * GET
@@ -43,9 +42,6 @@ router.post('/setFeatured', servicesController.setFeatured);
  */
 router.put('/:id', servicesController.update);
 
-router.put('/stock/:id', servicesController.updateStock);
-
-router.put('/stock/bundle/:id', servicesController.updateBundleStock);
 
 /*
  * DELETE
