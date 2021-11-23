@@ -16,7 +16,8 @@ const stockLogsRoute = require('./routes/stockLogsRoutes');
 const shippingRoute = require('./routes/shippingRoutes');
 const questionsRoute = require('./routes/questionsRoutes');
 const consultants = require('./routes/consultantRoutes');
-const coupons = require('./routes/couponRoutes')
+const coupons = require('./routes/couponRoutes');
+const admin = require('./routes/adminRoutes')
 const bodypasrer = require('body-parser');
 const cors = require('cors');
 const app = express();
@@ -32,7 +33,7 @@ app.use(cors());
 app.use(express.json());
 
 
-
+app.use('/admin', admin)
 app.use('/users', UsersRoutes);
 app.use('/clients', ClientRoutes);
 app.use('/roles', roleRoute);
