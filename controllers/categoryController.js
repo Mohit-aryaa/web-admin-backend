@@ -1,7 +1,6 @@
 var CategoryModel = require('../models/categoryModel.js');
 const fs = require('fs');
 const connection = require("../db");
-//const { any } = require('../middleware/upload.js');
 const mongoose = require("mongoose");
 const Grid = require("gridfs-stream");
 let gfs;

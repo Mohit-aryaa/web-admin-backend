@@ -121,18 +121,21 @@ module.exports = {
 
     upload: function(req, res) {
         let path = '';
-        let setpath = 'http://localhost:3000/services/file'
+        let setpath = 'http://localhost:3000/services/file/'
         if (req.files === undefined) 
         return res.send("you must select a file.");
 
         req.files.forEach(function(files,_index, _arr) {
             path = path + setpath+ files.id + ',';
+        
         })
         path = path.substring(0, path.lastIndexOf(",")) 
         
         return res.json({
             imagePath: path.split(',')
+    
         })
+
     },
 
     getFile: async function(req, res) {

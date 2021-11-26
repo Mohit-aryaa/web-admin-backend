@@ -17,6 +17,7 @@ const shippingRoute = require('./routes/shippingRoutes');
 const questionsRoute = require('./routes/questionsRoutes');
 const consultants = require('./routes/consultantRoutes');
 const coupons = require('./routes/couponRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const admin = require('./routes/adminRoutes')
 
@@ -54,6 +55,7 @@ app.use('/questions', questionsRoute)
 app.use('/consultants', consultants);
 app.use('/coupons', coupons)
 app.use('/services', servicesRoutes);
+app.use('/notification', notificationRoutes);
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");

@@ -35,9 +35,9 @@ module.exports = {
                 if (filter) {
                     brands = brands.filter(el => {
                         let el2 = JSON.parse(JSON.stringify(el))
-                        for(let key in el2) {
+                        for (let key in el2) {
                             let setBrands = el[key]?.toString().toLowerCase().includes(filter.toLowerCase())
-                            if(setBrands) {
+                            if (setBrands) {
                                 return true;
                             }
                         }
@@ -50,7 +50,7 @@ module.exports = {
                     Brands
                 });
             }
-        }).sort({_id: -1});
+        }).sort({ _id: -1 });
     },
 
     /**
@@ -59,7 +59,7 @@ module.exports = {
     show: function (req, res) {
         var id = req.params.id;
 
-        BrandModel.findOne({_id: id}, function (err, brand) {
+        BrandModel.findOne({ _id: id }, function (err, brand) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when getting brand.',
@@ -82,13 +82,13 @@ module.exports = {
      */
     create: function (req, res) {
         var brand = new BrandModel({
-			brandName : req.body.brandName,
-			brandDescription : req.body.brandDescription,
-            brandBanner : req.body.brandBanner,
+            brandName: req.body.brandName,
+            brandDescription: req.body.brandDescription,
+            brandBanner: req.body.brandBanner,
             metaTitle: req.body.metaTitle,
             metaDescription: req.body.metaDescription,
             seoUrl: req.body.seoUrl,
-            created_at : new Date(),
+            created_at: new Date(),
             updated_at: 'none'
         });
 
@@ -110,8 +110,8 @@ module.exports = {
     update: function (req, res) {
         var id = req.params.id;
 
-        BrandModel.findOne({_id: id}, async function (err, brand) {
-            gfs = await Grid(conn.db,  mongoose.mongo);
+        BrandModel.findOne({ _id: id }, async function (err, brand) {
+            gfs = await Grid(conn.db, mongoose.mongo);
             gfs.collection("uploads");
             if (err) {
                 return res.status(500).json({
@@ -129,22 +129,22 @@ module.exports = {
             const last = getData[getData.length - 1]
             const getBrandBanner = last.toString();
             brand.brandName = req.body.brandName ? req.body.brandName : brand.brandName;
-			brand.brandDescription = req.body.brandDescription ? req.body.brandDescription : brand.brandDescription;
+            brand.brandDescription = req.body.brandDescription ? req.body.brandDescription : brand.brandDescription;
             brand.brandBanner = req.body.brandBanner ? req.body.brandBanner : brand.brandBanner;
             brand.metaTitle = req.body.metaTitle ? req.body.metaTitle : brand.metaTitle;
             brand.metaDescription = req.body.metaDescription ? req.body.metaDescription : brand.metaDescription;
-            brand.seoUrl = req.body.seoUrl ? req.body.seoUrl :  brand.seoUrl;
-			brand.updated_at = new Date();
-            brand.save(async function (err, brand)  {
+            brand.seoUrl = req.body.seoUrl ? req.body.seoUrl : brand.seoUrl;
+            brand.updated_at = new Date();
+            brand.save(async function (err, brand) {
                 if (err) {
                     return res.status(500).json({
                         message: 'Error when updating brand.',
                         error: err
                     });
                 } else {
-                     if(req.body.brandBanner !== undefined) {
+                    if (req.body.brandBanner !== undefined) {
                         try {
-                            await gfs.remove({_id: getBrandBanner, root: 'uploads'});
+                            await gfs.remove({ _id: getBrandBanner, root: 'uploads' });
                         } catch (error) {
                             console.log(error);
                             res.send("An error occured.");
@@ -166,19 +166,19 @@ module.exports = {
     //     } 
     // },
 
-    upload: function(req, res) {
-        if (req.file === undefined) 
-        return res.send("you must select a file.");
+    upload: function (req, res) {
+        if (req.file === undefined)
+            return res.send("you must select a file.");
         //console.log(req.file)
-        
+
         const imgUrl = `http://localhost:3000/brands/file/${req.file.id}`;
         return res.json({
             imagePath: imgUrl
         })
     },
 
-    getFile: async function(req, res) {
-        gfs = await Grid(conn.db,  mongoose.mongo);
+    getFile: async function (req, res) {
+        gfs = await Grid(conn.db, mongoose.mongo);
         gfs.collection("uploads");
         try {
             //console.log('req.params.id', req.params.id)
@@ -189,9 +189,9 @@ module.exports = {
         } catch (error) {
             console.log(error)
             res.status(500).json({
-                message:"not found" , 
+                message: "not found",
                 error: error.message
-            }) ;
+            });
         }
     },
 
@@ -201,7 +201,7 @@ module.exports = {
     remove: function (req, res) {
         var id = req.params.id;
         let getBrandBanner = '';
-        BrandModel.findOne({_id: id} ,function (err, brand) {
+        BrandModel.findOne({ _id: id }, function (err, brand) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when deleting the brand.',
@@ -213,7 +213,7 @@ module.exports = {
             getBrandBanner = last.toString();
         });
         BrandModel.findByIdAndRemove(id, async function (err, brand) {
-            gfs = await Grid(conn.db,  mongoose.mongo);
+            gfs = await Grid(conn.db, mongoose.mongo);
             gfs.collection("uploads");
             if (err) {
                 return res.status(500).json({
@@ -223,16 +223,16 @@ module.exports = {
             }
             else {
                 try {
-                    await gfs.remove({_id: getBrandBanner, root: 'uploads'});
+                    await gfs.remove({ _id: getBrandBanner, root: 'uploads' });
                     //await gfs.files.deleteOne({_id: new mongoose.Types.ObjectId(getBrandBanner)});
-                    
+
                 } catch (error) {
                     console.log(error);
                     res.send("An error occured.");
                 }
             }
             return res.status(200).json({
-                message: "Brand deleted successfully"
+                message: "Group deleted successfully"
             });
         });
     },
@@ -258,12 +258,12 @@ module.exports = {
                     message: 'Error when deleting the Brand.',
                     error: err
                 });
-            } 
-            if(getBrands == null) {
+            }
+            if (getBrands == null) {
                 console.log('Brand has no banner');
-            } 
+            }
             else {
-                gfs = await Grid(conn.db,  mongoose.mongo);
+                gfs = await Grid(conn.db, mongoose.mongo);
                 gfs.collection("uploads");
                 try {
                     for (let index = 0; index < getBrands.length; index++) {
@@ -271,19 +271,19 @@ module.exports = {
                         const last = getData[getData.length - 1]
                         let getBrandBanner = last.toString();
                         console.log(getBrandBanner)
-                        await gfs.remove({_id: getBrandBanner, root: 'uploads'});
-                        //await gfs.files.deleteOne({_id: new mongoose.Types.ObjectId(getBrandBanner)});   
-                     }
-                    
-                 } catch (error) {
-                     console.log(error);
-                     return res.status(500).json({message: "An error occured"});
-                 }
-               
+                        await gfs.remove({ _id: getBrandBanner, root: 'uploads' });
+                        //await gfs.files.deleteOne({_id: new mongoose.Types.ObjectId(getBrandBanner)});
+                    }
+
+                } catch (error) {
+                    console.log(error);
+                    return res.status(500).json({ message: "An error occured" });
+                }
+
             }
-            
+
             return res.status(200).json({
-                message: 'Brands deleted successfully'
+                message: 'Groups deleted successfully'
             });
 
         });
